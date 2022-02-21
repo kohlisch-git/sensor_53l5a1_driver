@@ -1,0 +1,10 @@
+<launch>
+    <node name="serial_node_vl53l5" pkg="rosserial_python" type="serial_node.py">
+        <param name="port" value="/dev/ttyACM0" />
+        <param name="baud" value="115200" />
+    </node>
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
+    <node name="VL53L5A1Node" pkg="sensors_53l5a1_driver" type="VL53L5A1Node" output="screen">
+        <param name="n_layers" value="1" />
+    </node>
+</launch>
