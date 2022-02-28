@@ -47,7 +47,7 @@ class VL53L5A1Node
 	private:
     	int n_layers = 1;
 		float sensor_h_fov = 45.f, sensor_v_fov = 45.f;
-		std::string frame_id;
+		std::string sensor_frame_id;
 
 		static VL53L5A1Node* instance;
 

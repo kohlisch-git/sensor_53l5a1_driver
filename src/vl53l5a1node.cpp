@@ -30,7 +30,7 @@ VL53L5A1Node::VL53L5A1Node()
     nh.param("output_topic", output_topic, std::string("/vl53l5_cloud"));
     nh.param("angle_h_fov", sensor_h_fov, 45.f);
     nh.param("angle_v_fov", sensor_v_fov, 45.f);
-    nh.param("sensor_frame_id", frame_id, std::string("vl53l5a1_sensor"));
+    nh.param("sensor_frame_id", sensor_frame_id, std::string("base"));
 
     pub_control = nh.advertise<sensors_53l5a1_driver::control>(topic_control, 500);
     pub_pcl = nh.advertise<sensor_msgs::PointCloud2> (output_topic, 1);
@@ -134,6 +134,8 @@ void VL53L5A1Node::makePointCloud(const sensors_53l5a1_driver::distanceConstPtr 
         h_angle = (h_angle_initial - h_pos * h_angle_inc) * M_PI/ 180.f;
         /* x-axis is distance, y-axis left to right on sensor, z is bottom to top on sensor */
         x = msg->distance_mm[i] * 0.001;
+        if (msg->distance_mm[i] == 0)   // having points in the origin is dangerous!
+            x = 0.0001;                 // -> make tem close to origin, but not 0!
         y = x * std::sin(v_angle);
         z = x * std::sin(h_angle) * std::cos(v_angle);
         cloud_ptr->insert(cloud_ptr->end(), pcl::PointXYZ(x,y,z));
@@ -143,7 +145,7 @@ void VL53L5A1Node::makePointCloud(const sensors_53l5a1_driver::distanceConstPtr 
         /* convert to ROS-format and publish */
         sensor_msgs::PointCloud2 output;
         pcl::toROSMsg(*cloud_ptr, output);
-        output.header.frame_id = this->frame_id;
+        output.header.frame_id = sensor_frame_id;
         output.header.stamp = ros::Time::now();
         pub_pcl.publish(output);
     }
